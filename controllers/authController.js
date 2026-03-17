@@ -83,8 +83,8 @@ export const forgotPassword = async (req, res) => {
       expiresIn: "15m",
     });
 
-    const resetLink = `http://localhost:5173/reset-password/${token}`;
-
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
+    
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,

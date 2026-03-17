@@ -16,7 +16,7 @@ router.put("/cancel/:id", protect, cancelBooking)
 
 router.get("/admin", protect, adminOnly, getAllBookings)
 
-router.delete("/admin/:id", protect, deleteBooking, adminOnly);
+router.delete("/admin/:id", protect, adminOnly, deleteBooking);
 
 router.get("/invoice/:id", protect, downloadInvoice)
 export default router
