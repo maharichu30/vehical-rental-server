@@ -82,55 +82,42 @@ export const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
+    // ✅ ADD HERE 👇
+    console.log("STEP 1: User found");
+
     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
       expiresIn: "15m",
     });
 
+    // ✅ ADD HERE 👇
+    console.log("STEP 2: Token created");
+    console.log("EMAIL_USER:", process.env.EMAIL_USER);
+
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
-    
-    await transporter.sendMail({
-      from: process.env.EMAIL_USER,
-      to: email,
-      subject: "DriveNow Password Reset",
-      html: `
-          <div style="font-family: Arial; text-align:center; padding:20px">
 
-            <h2 style="color:#22c55e;">DriveNow Password Reset</h2>
+    // 🔥 WRAP THIS PART
+    try {
+      console.log("STEP 3: Sending mail...");
 
-            <p>You requested to reset your password.</p>
+      await transporter.sendMail({
+        from: process.env.EMAIL_USER,
+        to: email,
+        subject: "DriveNow Password Reset",
+        html: `<h1>Test Mail</h1>`,
+      });
 
-            <p>Click the button below to create a new password.</p>
-
-            <a href="${resetLink}"
-                style="
-                 display:inline-block;
-                padding:12px 25px;
-                background:#22c55e;
-                color:black;
-                text-decoration:none;
-                border-radius:6px;
-                font-weight:bold;
-                 margin-top:10px;
-                ">
-                  Reset Password
-            </a>
-
-            <p style="margin-top:20px;font-size:12px;color:gray">
-              If you did not request this, you can ignore this email.
-            </p>
-
-          </div>
-        `,
-    });
+      console.log("✅ Mail sent");
+    } catch (mailError) {
+      console.log("❌ MAIL ERROR:", mailError);
+      return res.status(500).json({ message: "Mail failed" });
+    }
 
     res.json({ message: "Reset link sent to email" });
   } catch (error) {
-    console.log(error);
-
+    console.log("❌ FULL ERROR:", error);
     res.status(500).json({ message: "Server error" });
   }
 };
-
 export const resetPassword = async (req, res) => {
   try {
     const { token } = req.params;
