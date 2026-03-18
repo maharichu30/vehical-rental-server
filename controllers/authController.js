@@ -2,6 +2,9 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import transporter from "../config/mail.js";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 export const registerUser = async (req, res) => {
   try {
