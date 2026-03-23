@@ -82,20 +82,20 @@ export const forgotPassword = async (req, res) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // ✅ ADD HERE 👇
     console.log("STEP 1: User found");
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "15m",
-    });
+    const token = jwt.sign(
+      { id: user._id },
+      process.env.JWT_SECRET,
+      { expiresIn: "15m" }
+    );
 
-    // ✅ ADD HERE 👇
     console.log("STEP 2: Token created");
-    console.log("EMAIL_USER:", process.env.EMAIL_USER);
 
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
 
-    // 🔥 WRAP THIS PART
+    console.log("Reset Link:", resetLink);
+
     try {
       console.log("STEP 3: Sending mail...");
 
@@ -103,16 +103,22 @@ export const forgotPassword = async (req, res) => {
         from: process.env.EMAIL_USER,
         to: email,
         subject: "DriveNow Password Reset",
-        html: `<h1>Test Mail</h1>`,
+        html: `
+          <h2>Password Reset</h2>
+          <p>Click below link to reset password</p>
+          <a href="${resetLink}">${resetLink}</a>
+        `,
       });
 
       console.log("✅ Mail sent");
+
+      res.json({ message: "Reset link sent to email" });
+
     } catch (mailError) {
       console.log("❌ MAIL ERROR:", mailError);
       return res.status(500).json({ message: "Mail failed" });
     }
 
-    res.json({ message: "Reset link sent to email" });
   } catch (error) {
     console.log("❌ FULL ERROR:", error);
     res.status(500).json({ message: "Server error" });
@@ -137,7 +143,6 @@ export const resetPassword = async (req, res) => {
     res.status(400).json({ message: "Invalid or expired token" });
   }
 };
-
 export const sendLoginOTP = async (req, res) => {
   try {
     const { email, password } = req.body;
