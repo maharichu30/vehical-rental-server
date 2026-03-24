@@ -19,10 +19,17 @@ const app = express();
 
 app.use(
   cors({
-    origin: "https://vehiclerental-online-client.netlify.app",
-    credentials: true,
-  }),
-);
+    origin: [
+      "https://vehiclerental-online-client.netlify.app",
+      "http://localhost:5173"
+    ],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    credentials: true
+  })
+)
+
+app.options("*", cors())
+
 app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/cars", carRoutes);
