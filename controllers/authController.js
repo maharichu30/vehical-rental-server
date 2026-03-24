@@ -75,25 +75,19 @@ export const loginUser = async (req, res) => {
 export const forgotPassword = async (req, res) => {
   try {
     const { email } = req.body;
-
     const user = await User.findOne({ email });
 
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
-
     console.log("STEP 1: User found");
 
-    const token = jwt.sign(
-      { id: user._id },
-      process.env.JWT_SECRET,
-      { expiresIn: "15m" }
-    );
-
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "15m",
+    });
     console.log("STEP 2: Token created");
 
     const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
-
     console.log("Reset Link:", resetLink);
 
     try {
@@ -113,12 +107,10 @@ export const forgotPassword = async (req, res) => {
       console.log("✅ Mail sent");
 
       res.json({ message: "Reset link sent to email" });
-
     } catch (mailError) {
       console.log("❌ MAIL ERROR:", mailError);
       return res.status(500).json({ message: "Mail failed" });
     }
-
   } catch (error) {
     console.log("❌ FULL ERROR:", error);
     res.status(500).json({ message: "Server error" });
