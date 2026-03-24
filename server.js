@@ -2,7 +2,6 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import connectDB from "./config/db.js";
-
 import carRoutes from "./routes/carRoutes.js";
 import bookingRoutes from "./routes/bookingRoutes.js";
 import paymentRoutes from "./routes/paymentRoutes.js";
@@ -13,26 +12,18 @@ import wishlistRoutes from "./routes/wishlistRoutes.js";
 import hostRoutes from "./routes/hostRoutes.js";
 
 dotenv.config();
+
 connectDB();
 
 const app = express();
 
-// ✅ CORS configuration
-const corsOptions = {
-  origin: [
-    "https://vehiclerental-online-client.netlify.app",
-    "http://localhost:5173"
-  ],
-  methods: ["GET", "POST", "PUT", "DELETE"],
-  credentials: true
-};
-
-app.use(cors(corsOptions));
-app.options("*", cors(corsOptions));
-
+app.use(
+  cors({
+    origin: "https://vehiclerental-online-client.netlify.app",
+    credentials: true,
+  }),
+);
 app.use(express.json());
-
-// routes
 app.use("/api/auth", authRoutes);
 app.use("/api/cars", carRoutes);
 app.use("/api/bookings", bookingRoutes);
@@ -42,7 +33,6 @@ app.use("/api/reviews", reviewRoutes);
 app.use("/api/wishlist", wishlistRoutes);
 app.use("/api/host", hostRoutes);
 
-// test route
 app.get("/", (req, res) => {
   res.send("Vehicle Rental API Running 🚗");
 });
