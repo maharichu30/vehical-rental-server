@@ -72,48 +72,113 @@ export const loginUser = async (req, res) => {
   }
 };
 
+// export const forgotPassword = async (req, res) => {
+//   try {
+//     const { email } = req.body;
+//     const user = await User.findOne({ email });
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+//     console.log("STEP 1: User found");
+
+//     const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
+//       expiresIn: "15m",
+//     });
+//     console.log("STEP 2: Token created");
+
+//     const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
+//     console.log("Reset Link:", resetLink);
+
+//     try {
+//       console.log("STEP 3: Sending mail...");
+
+//       await transporter.sendMail({
+//         from: process.env.EMAIL_USER,
+//         to: email,
+//         subject: "DriveNow Password Reset",
+//         html: `
+//           <h2>Password Reset</h2>
+//           <p>Click below link to reset password</p>
+//           <a href="${resetLink}">${resetLink}</a>
+//         `,
+//       });
+
+//       console.log("✅ Mail sent");
+
+//       res.json({ message: "Reset link sent to email" });
+//     } catch (mailError) {
+//       console.log("❌ MAIL ERROR:", mailError);
+//       return res.status(500).json({ message: "Mail failed" });
+//     }
+//   } catch (error) {
+//     console.log("❌ FULL ERROR:", error);
+//     res.status(500).json({ message: "Server error" });
+//   }
+// };
+
 export const forgotPassword = async (req, res) => {
   try {
+
+    console.log("STEP 1: Request received");
+
     const { email } = req.body;
+    console.log("STEP 2: Email:", email);
+
     const user = await User.findOne({ email });
 
     if (!user) {
+      console.log("STEP 3: User not found");
       return res.status(404).json({ message: "User not found" });
     }
-    console.log("STEP 1: User found");
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "15m",
+    console.log("STEP 3: User found");
+
+    const token = crypto.randomBytes(32).toString("hex");
+    console.log("STEP 4: Token generated:", token);
+
+    user.resetToken = token;
+    user.resetTokenExpire = Date.now() + 3600000;
+
+    await user.save();
+    console.log("STEP 5: Token saved in DB");
+
+    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+
+    console.log("STEP 6: Reset Link:", resetLink);
+
+    console.log("STEP 7: EMAIL USER:", process.env.EMAIL_USER);
+    console.log("STEP 8: EMAIL PASS:", process.env.EMAIL_PASS);
+
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
     });
-    console.log("STEP 2: Token created");
 
-    const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
-    console.log("Reset Link:", resetLink);
+    console.log("STEP 9: Transporter created");
 
-    try {
-      console.log("STEP 3: Sending mail...");
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: "Password Reset",
+      html: `<a href="${resetLink}">Reset Password</a>`
+    });
 
-      await transporter.sendMail({
-        from: process.env.EMAIL_USER,
-        to: email,
-        subject: "DriveNow Password Reset",
-        html: `
-          <h2>Password Reset</h2>
-          <p>Click below link to reset password</p>
-          <a href="${resetLink}">${resetLink}</a>
-        `,
-      });
+    console.log("STEP 10: Mail sent");
 
-      console.log("✅ Mail sent");
+    res.json({ message: "Reset link sent" });
 
-      res.json({ message: "Reset link sent to email" });
-    } catch (mailError) {
-      console.log("❌ MAIL ERROR:", mailError);
-      return res.status(500).json({ message: "Mail failed" });
-    }
   } catch (error) {
-    console.log("❌ FULL ERROR:", error);
-    res.status(500).json({ message: "Server error" });
+
+    console.log("MAIL ERROR:", error);
+
+    res.status(500).json({
+      message: "mail failed",
+      error: error.message
+    });
   }
 };
 
