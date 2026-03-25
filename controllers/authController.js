@@ -136,6 +136,8 @@ export const forgotPassword = async (req, res) => {
 
     console.log("STEP 6: Reset Link:", resetLink);
 
+
+
     await transporter.sendMail({
       from: process.env.EMAIL_USER,
       to: email,
@@ -146,6 +148,9 @@ export const forgotPassword = async (req, res) => {
         <a href="${resetLink}">${resetLink}</a>
       `
     });
+
+    await transporter.verify();
+      console.log("SMTP Connected Successfully");
 
     console.log("STEP 7: Mail sent");
 
