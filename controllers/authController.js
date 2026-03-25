@@ -132,7 +132,7 @@ export const forgotPassword = async (req, res) => {
 
     console.log("STEP 5: Token saved");
 
-    const resetLink = `${process.env.FRONTEND_URL}/reset-password/${token}`;
+    const resetLink = `${process.env.CLIENT_URL}/reset-password/${token}`;
 
     console.log("STEP 6: Reset Link:", resetLink);
 
